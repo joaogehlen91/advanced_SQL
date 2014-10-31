@@ -19,9 +19,9 @@ A correção será feita de duas formas: executando os scripts (o readme tem que
 
 
 -- Tablespaces
-CREATE TABLESPACE ts_padrao LOCATION '/home/joao/aleljo/';
-CREATE TABLESPACE ts_tabela LOCATION '/home/joao/aleljo/';
-SET default_tablespace = ts_padrao;
+--CREATE TABLESPACE ts_padrao LOCATION '/home/joao/aleljo/';
+--CREATE TABLESPACE ts_tabela LOCATION '/home/joao/aleljo/';
+--SET default_tablespace = ts_padrao;
 
 -- cria usuario e dá permissoes
 CREATE USER dono;
@@ -34,20 +34,17 @@ CREATE DATABASE aleljo
   WITH OWNER = postgres;
 
 
-
-
-
-
-
-
-
+-- conecta no banco novo
+\c aleljo;
 
 
 -- Schema
-CREATE SCHEMA esquema
-  AUTHORIZATION dono, usuario1, usuario2;
+CREATE SCHEMA esquema;
+SET search_path to esquema;
 
-GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA esquema TO dono;
+GRANT ALL ON SCHEMA esquema TO usuario1;
+GRANT ALL ON SCHEMA esquema TO usuario2;
 
 
 
