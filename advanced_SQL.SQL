@@ -31,7 +31,7 @@ CREATE USER usuario2;
 
 -- cria database
 CREATE DATABASE aleljo
-  WITH OWNER = postgres;
+  WITH OWNER = dono;
 
 
 -- conecta no banco novo
@@ -47,6 +47,12 @@ GRANT ALL ON SCHEMA esquema TO usuario1;
 GRANT ALL ON SCHEMA esquema TO usuario2;
 
 
+CREATE TABLE veiculo (
+	placa		varchar(8) PRIMARY KEY,
+	marca		varchar(30),
+	modelo		varchar(30),
+	cod_frota	
+)
 
 
 /*CREATE DATABASE aleljo
