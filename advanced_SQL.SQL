@@ -47,19 +47,72 @@ GRANT ALL ON SCHEMA esquema TO usuario1;
 GRANT ALL ON SCHEMA esquema TO usuario2;
 
 
+CREATE TABLE frota (
+	cod_frota	integer PRIMARY KEY,
+	nome		varchar(30),
+	qt_veic		integer
+);
+
+
 CREATE TABLE veiculo (
 	placa		varchar(8) PRIMARY KEY,
 	marca		varchar(30),
 	modelo		varchar(30),
-	cod_frota	
-)
+	cod_frota	integer REFERENCES frota(cod_frota)
+);
+
+INSERT INTO frota(cod_frota, nome, qt_veic) VALUES(1, 'ronda no norte', 0);
+INSERT INTO frota(cod_frota, nome, qt_veic) VALUES(2, 'ronda no sul', 0);
+INSERT INTO frota(cod_frota, nome, qt_veic) VALUES(3, 'ronda no leste', 0);
+INSERT INTO frota(cod_frota, nome, qt_veic) VALUES(4, 'ronda no oeste', 0);
+
+INSERT INTO veiculo(placa, marca, modelo, cod_frota) VALUES('AAA-1111', 'chevrolet', 'corsa', 1);
+INSERT INTO veiculo(placa, marca, modelo, cod_frota) VALUES('PAT-6835', 'volkswagen', 'gol', 2);
+INSERT INTO veiculo(placa, marca, modelo, cod_frota) VALUES('BCR-4679', 'citroen', 'c4-pallas', 3);
+INSERT INTO veiculo(placa, marca, modelo, cod_frota) VALUES('IJK-0987', 'mercedes-benz', 'CLS 350', 4);
+INSERT INTO veiculo(placa, marca, modelo, cod_frota) VALUES('LCT-1837', 'volkswagen', 'kombi', 2);
+INSERT INTO veiculo(placa, marca, modelo, cod_frota) VALUES('OIU-4567', 'volkswagen', 'voyage', 4);
 
 
-/*CREATE DATABASE aleljo
-  WITH OWNER = postgres
-       ENCODING = 'UTF8'
-       TABLESPACE = pg_default
-       LC_COLLATE = 'Portuguese_Brazil.1252'
-       LC_CTYPE = 'Portuguese_Brazil.1252'
-       CONNECTION LIMIT = -1;*/
+CREATE TABLE veic_audit(
+    op         	char(1),
+    dthr       	timestamp,
+    usuario    	text,
+    placa   	text,
+    frota 		integer
+);
 
+CREATE OR REPLACE FUNCTION func_veic_audit() RETURNS TRIGGER AS 
+$$
+    BEGIN
+        IF (TG_OP = 'DELETE') THEN
+            INSERT INTO veic_audit SELECT 'D', now(), user, OLD.placa, OLD.cod_frota;
+            RETURN OLD;
+        ELSIF (TG_OP = 'UPDATE') THEN
+            INSERT INTO veic_audit SELECT 'U', now(), user, NEW.placa, NEW.cod_frota;
+            RETURN NEW;
+        ELSIF (TG_OP = 'INSERT') THEN
+            INSERT INTO veic_audit SELECT 'I', now(), user, NEW.placa, NEW.cod_frota;
+            RETURN NEW;
+        END IF;
+        RETURN NULL; -- result is ignored since this is an AFTER trigger
+    END;
+$$ 
+LANGUAGE plpgsql;
+
+CREATE TRIGGER tg_veic_audit
+AFTER INSERT OR UPDATE OR DELETE ON veiculo
+    FOR EACH ROW EXECUTE PROCEDURE func_veic_audit();
+
+
+
+
+/*
+CREATE OR REPLACE FUNCTION up_qt_veic() RETURNS TRIGGER AS
+$$
+	BEGIN
+
+	END
+$$
+LANGUAGE 'plpgsql';
+*/
